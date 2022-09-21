@@ -1,42 +1,22 @@
 package main
 
 import (
-	"fmt"
-	"io"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/template/html"
+	"github.com/xegcrbq/P2PChat/controller"
 	"log"
-	"net/http"
-	"strconv"
-	"strings"
 )
 
 func main() {
-	port := 0
-	fmt.Print("Введите порт для приёма сообщений: ")
-	fmt.Scan(&port)
-	go server(strconv.Itoa(port))
-	fmt.Print("Введите порт для отправки сообщений: ")
-	fmt.Scan(&port)
-	client(strconv.Itoa(port))
-}
+	engine := html.New("./templates", ".html")
+	cC := &controller.ChatController{}
+	app := fiber.New(fiber.Config{
+		Views: engine,
+	})
 
-func server(port string) {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/send", messageReceiver)
-	log.Fatal(http.ListenAndServe("127.0.0.1:"+port, mux))
+	app.Get("from/:you/to/:anotherUser", cC.ChatWindow)
+	app.Post("send-message/", cC.Send)
+	app.Post("update/", cC.Update)
 
-}
-func client(port string) {
-	URL := "http://127.0.0.1:" + port + "/send"
-	for {
-		messageToSend := ""
-		fmt.Scan(&messageToSend)
-		res, _ := http.Post(URL, "application/json", strings.NewReader(messageToSend))
-		answer, _ := io.ReadAll(res.Body)
-		fmt.Println(string(answer))
-	}
-}
-func messageReceiver(w http.ResponseWriter, r *http.Request) {
-	data, _ := io.ReadAll(r.Body)
-	fmt.Fprintf(w, `your message "%v" received`, string(data))
-	fmt.Println("message: ", string(data))
+	log.Fatal(app.Listen(":1080"))
 }

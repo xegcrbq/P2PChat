@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style type="text/css">
+        .messageHistory {
+            resize: none;
+            height: 500px;
+            width: 500px;
+        }
+        .messageToSend {
+            resize: none;
+            height: 100px;
+            width: 400px;
+        }
+        .buttonSend{
+            height: 110px;
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <textarea class="messageHistory" disabled="disabled" id="messageHistory" name="messageHistory">{{.messages}}</textarea>
+    </div>
+    <div>
+        <textarea class="messageToSend" id="messageToSend" name="messageToSend"></textarea>
+        <button class="buttonSend" id="buttonSend" name="buttonSend" ></button>
+        <script>
+
+
+            const buttonSend = document.querySelector('.buttonSend');
+            const messageToSend = document.querySelector('.messageToSend');
+            const messageHistory = document.querySelector('.messageHistory');
+            const you = window.location.href.split('/')[4];
+            const anotherUser = window.location.href.split('/')[6];
+
+            async function update () {
+                const resp = (await postData('/update/', {
+                    sender: you,
+                    target: anotherUser,
+                }).then(res => res.json()));
+                messageHistory.value = resp.MessageHistory
+            }
+
+            setInterval(update, 5000);
+            buttonSend.addEventListener('click', () => {
+                postData('/send-message/', {
+                    sender: you,
+                    target: anotherUser,
+                    text: messageToSend.value,
+                    time: Date.now()
+                });
+                update()
+                messageToSend.value = ""
+            })
+            async function postData(url = '', data = {}) {
+                // Default options are marked with *
+                const response = await fetch(url, {
+                    method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                    mode: 'cors', // no-cors, *cors, same-origin
+                    cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                    credentials: 'same-origin', // include, *same-origin, omit
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    redirect: 'follow', // manual, *follow, error
+                    referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                    body: JSON.stringify(data) // body data type must match "Content-Type" header
+                });
+                    return response; // parses JSON response into native JavaScript objects
+            }
+
+
+        </script>
+    </div>
+
+</body>
+</html>
