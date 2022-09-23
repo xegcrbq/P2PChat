@@ -6,14 +6,14 @@ import (
 )
 
 type Message struct {
-	MessageId    int32     `db:messageid`
-	SenderId     int32     `db:senderid`
-	ReaderId     int32     `db:readerid`
-	OrderId      int32     `db:orderid`
-	MessageText  string    `db:messagetext`
-	AttachmentId int32     `db:attachmentid`
-	SendTime     time.Time `db:sendtime`
-	IsRead       bool      `db:isread`
+	MessageId    int32     `db:"messageid"`
+	SenderId     int32     `db:"senderid"`
+	ReaderId     int32     `db:"readerid"`
+	OrderId      int32     `db:"orderid"`
+	MessageText  string    `db:"messagetext"`
+	AttachmentId int32     `db:"attachmentid"`
+	SendTime     time.Time `db:"sendtime"`
+	IsRead       bool      `db:"isread"`
 }
 
 type OldMessage struct {

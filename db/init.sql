@@ -29,7 +29,8 @@ create table Messages(
     ReaderId integer references Users(UserId) NOT NULL,
     OrderId integer references Orders(OrderId) NOT NULL,
     MessageText text,
-    AttachmentId integer references Attachments(AttachmentId),
+    AttachmentId integer NULL,
+    Foreign Key(AttachmentId) references Attachments(AttachmentId),
     SendTime time without time zone NOT NULL,
     IsRead bit DEFAULT 0::bit
 );
@@ -44,3 +45,7 @@ insert into
     orders(OrderId, SellerId, SellerTicker, SellerAmount, BuyerId, BuyerTicker, BuyerAmount)
 VALUES
     (1, 1, 'BTC', 0.0002, 2, 'RUB', 800);
+insert into
+    attachments(attachmentid, path)
+values
+    (1, './test.http')
