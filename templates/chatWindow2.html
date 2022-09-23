@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="dialogueMain">
+        <div class="nickname">{{.nickname}}</div>
+
+        <div class="messageHistory">
+            <div class="message">Hello</div>
+            <div class="message green">asdaasssssssssssssssd</div>
+        </div>
+        <div class="messageInput">
+            <input class="inputField" type="text">
+            <div>
+                <input class="inputFile" type="file">
+                <input class="inputButton" type="submit">
+            </div>
+        </div>
+        <script>
+            const inputField = document.querySelector('.inputField');
+            const inputButton = document.querySelector('.inputButton');
+            const inputFile = document.querySelector('.inputFile');
+            const reader = new FileReader();
+            inputField.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    console.log('enter')
+                    if (inputFile.files.length != 0){
+                        let formData = new FormData();
+                        formData.append("photo", inputFile.files[0]);
+                        postFile('/uploadFile/', formData);
+                        console.log(inputFile.files[0])
+                    }
+                }
+            });
+            inputButton.addEventListener('click', function (e) {
+                    console.log('click')
+                if (inputFile.files.length != 0){
+                    let formData = new FormData();
+
+                    formData.append("photo", inputFile.files[0]);
+                    postFile('/uploadFile/', formData);
+                    console.log(inputFile.files[0])
+                }
+            });
+            async function postData(url = '', data = {}) {
+                // Default options are marked with *
+                const response = await fetch(url, {
+                    method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                    mode: 'cors', // no-cors, *cors, same-origin
+                    cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                    credentials: 'same-origin', // include, *same-origin, omit
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    redirect: 'follow', // manual, *follow, error
+                    referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                    body: JSON.stringify(data) // body data type must match "Content-Type" header
+                });
+                return response; // parses JSON response into native JavaScript objects
+            }
+            async function postFile(url = '', data = {}) {
+                // Default options are marked with *
+                const response = await fetch(url, {
+                    method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                    mode: 'cors', // no-cors, *cors, same-origin
+                    cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                    credentials: 'same-origin', // include, *same-origin, omit
+                    headers: {
+                        'Content-Type': 'file'
+                    },
+                    redirect: 'follow', // manual, *follow, error
+                    referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                    body: data // body data type must match "Content-Type" header
+                });
+                return response; // parses JSON response into native JavaScript objects
+            }
+        </script>
+    </div>
+</body>
+</html>

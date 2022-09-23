@@ -3,7 +3,7 @@ package models
 type Dialogue struct {
 	User1    string
 	User2    string
-	Messages []*Message
+	Messages []*OldMessage
 }
 
 func (d *Dialogue) String() string {

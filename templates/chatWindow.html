@@ -21,6 +21,20 @@
     </style>
 </head>
 <body>
+    <!-- Begin Talk-Me {literal} -->
+    <script>
+        (function(){(function c(d,w,m,i) {
+            window.supportAPIMethod = m;
+            var s = d.createElement('script');
+            s.id = 'supportScript';
+            var id = 'd9e25746aa78ec342c37d2b95ba0742b';
+            s.src = (!i ? 'https://lcab.talk-me.ru/support/support.js' : 'https://static.site-chat.me/support/support.int.js') + '?h=' + id;
+            s.onerror = i ? undefined : function(){c(d,w,m,true)};
+            w[m] = w[m] || function(){(w[m].q = w[m].q || []).push(arguments);};
+            (d.head || d.body).appendChild(s);
+        })(document,window,'TalkMe')})();
+    </script>
+    <!-- {/literal} End Talk-Me -->
     <div>
         <textarea class="messageHistory" disabled="disabled" id="messageHistory" name="messageHistory">{{.messages}}</textarea>
     </div>
@@ -28,7 +42,6 @@
         <textarea class="messageToSend" id="messageToSend" name="messageToSend"></textarea>
         <button class="buttonSend" id="buttonSend" name="buttonSend" ></button>
         <script>
-
 
             const buttonSend = document.querySelector('.buttonSend');
             const messageToSend = document.querySelector('.messageToSend');
@@ -71,10 +84,7 @@
                 });
                     return response; // parses JSON response into native JavaScript objects
             }
-
-
         </script>
     </div>
-
 </body>
 </html>
