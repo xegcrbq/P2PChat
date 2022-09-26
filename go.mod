@@ -10,7 +10,6 @@ require (
 	github.com/jackc/pgx/v5 v5.0.1
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/lib/pq v1.10.7
-	github.com/senago/technopark-dbms v0.0.0-20220615202506-d263e6309b93
 	github.com/sirupsen/logrus v1.4.2
 	github.com/stretchr/testify v1.8.0
 	github.com/thanhpk/randstr v1.0.4
@@ -31,9 +30,6 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.40.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
-	go.uber.org/atomic v1.9.0 // indirect
-	go.uber.org/multierr v1.8.0 // indirect
-	go.uber.org/zap v1.21.0 // indirect
 	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90 // indirect
 	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
 	golang.org/x/text v0.3.7 // indirect

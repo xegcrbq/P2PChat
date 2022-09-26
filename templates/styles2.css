@@ -20,7 +20,6 @@ div.nickname{
 .messageContainer{
     width: 100%;
     height: 50px;
-    background-color: yellow;
 }
 .message {
     border: 2px solid #dedede;
@@ -39,7 +38,7 @@ div.nickname{
 .messageHistory{
     overflow: auto;
     width: 100%;
-    height: calc(100% - 100px);
+    height: calc(100% - 120px);
 }
 
 .messageInput {

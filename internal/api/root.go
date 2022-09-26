@@ -39,7 +39,7 @@ func NewAPIService(log *logrus.Entry, dbConn *pgxpool.Pool) (*APIService, error)
 
 	controllersRegistry := controller.NewRegistry(log, repository)
 
-	api := svc.router.Group("/api")
+	api := svc.router.Group("/api/")
 	api.Static("/", "./templates")
 	api.Get("from/:you/to/:anotherUser", controllersRegistry.ChatController.ChatWindow)
 	api.Get("chat/", controllersRegistry.AuthController.UserChat)

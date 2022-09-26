@@ -16,8 +16,8 @@ func NewRegistry(log *logrus.Entry, repository *db.Repository) *Registry {
 	//serviceRegistry := service.NewRegistry(log, repository)
 
 	registry := &Registry{}
-
-	registry.ChatController = NewChatController(utils.NewTokenizer([]byte(randstr.Hex(10))))
-	registry.AuthController = NewAuthController(utils.NewTokenizer([]byte(randstr.Hex(10))))
+	tokenBytes := utils.NewTokenizer([]byte(randstr.Hex(10)))
+	registry.ChatController = NewChatController(tokenBytes)
+	registry.AuthController = NewAuthController(tokenBytes)
 	return registry
 }

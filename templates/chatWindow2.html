@@ -3,19 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles2.css">
 </head>
 <body>
     <div class="dialogueMain">
         <div class="nickname">Anonymous</div>
-
         <div class="messageHistory">
-            <div class="messageContainer">
-                <div class="message">Hello</div>
-            </div>
-            <div class="messageContainer">
-                <div class="message green">asdaasssssssssssssssd</div>
-            </div>
+
         </div>
         <div class="messageInput">
             <input class="inputField" type="text">
@@ -98,6 +92,19 @@
                     formData.append("photo", inputFile.files[0]);
                     postFile('/uploadFile/', formData);
                     console.log(inputFile.files[0])
+                }
+            }
+            setInterval(update, 5000);
+            async function update () {
+                const resp = (await postData('/update/v2/', {
+                    MessageCount: document.querySelectorAll('.messageContainer').length,
+                }));
+                if (resp.ok) {
+                    console.log(resp)
+                    console.log(resp.json())
+                }else {
+                    console.log(resp)
+                    console.log("wrong resp")
                 }
             }
         </script>
