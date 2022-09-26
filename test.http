@@ -4,6 +4,14 @@ GET http://127.0.0.1:1080/login/Roman
 ###если есть куки открываем чат
 GET http://127.0.0.1:1080/chat/
 ###
+
+POST http://127.0.0.1:1080/send/
+Content-Type: application/json
+
+{
+"Message": "ssdfsdf"
+}
+###
 POST https://lcab.talk-me.ru/json/v1.0/chat/operator/getList
 
 Content-Type: application/json

@@ -22,5 +22,9 @@ func main() {
 	app.Post("update/", cC.Update)
 	app.Post("uploadFile/", cC.SendFile)
 	app.Get("login/:username", cC.UsernameEntered)
+
+	//talkMe
+	app.Post("send/", cC.SendMessageToTalkMe)
+
 	log.Fatal(app.Listen(":1080"))
 }

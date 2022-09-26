@@ -7,8 +7,11 @@ import (
 	"github.com/xegcrbq/P2PChat/db"
 	"github.com/xegcrbq/P2PChat/models"
 	"github.com/xegcrbq/P2PChat/tokenizer"
+	"io"
+	"log"
 	"net/http"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -103,16 +106,13 @@ func (cC *ChatController) UserChat(c *fiber.Ctx) error {
 		c.SendStatus(http.StatusUnauthorized)
 		return nil
 	}
-	dc, token, err := cC.tknz.ParseDataClaims(sessionId)
+	_, token, err := cC.tknz.ParseDataClaims(sessionId)
 	if err != nil || !token.Valid {
 		c.SendStatus(http.StatusUnauthorized)
 		return nil
 	}
-	fmt.Println(cC.dialoguePairs[dc.Data])
 
-	return c.Render("chatWindow2", fiber.Map{
-		"nickname": cC.dialoguePairs[dc.Data],
-	})
+	return c.Render("chatWindow2", fiber.Map{})
 }
 func (cC *ChatController) newSession(username string) *fiber.Cookie {
 	expirationTime := time.Now().Add(30 * 24 * time.Hour)
@@ -127,5 +127,51 @@ func (cC *ChatController) UsernameEntered(c *fiber.Ctx) error {
 }
 func (cC *ChatController) SendFile(c *fiber.Ctx) error {
 	fmt.Println(string(c.Body()))
+	return nil
+}
+func (cC *ChatController) SendMessageToTalkMe(c *fiber.Ctx) error {
+	data, tkn, err := cC.tknz.ParseDataClaims(c.Cookies("session_id"))
+	if !(tkn.Valid) || err != nil {
+		c.SendStatus(http.StatusUnauthorized)
+		return nil
+	}
+	//fmt.Println(data.Data)
+	message := struct {
+		Message string
+	}{}
+	err = json.Unmarshal(c.Body(), &message)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	fmt.Println(message.Message)
+	URL := "https://lcab.talk-me.ru/json/v1.0/chat/message/sendToOperator"
+	json := strings.NewReader(fmt.Sprintf(`
+	{
+		"client": {
+			"id": "%v",
+			"name": "[defi]%v",
+			"phone": "+7-900-000-0000",
+			"email": "ivan@gmail.com"
+		},
+		"message": {
+			"text": "%v",
+			"tag": "%v",
+			"attachments": []
+		}
+	}
+	`, data.Data, data.Data, message.Message, time.Now().Unix()))
+	req, _ := http.NewRequest("POST", URL, json)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Token", "xuw9xn7znrz4658f862quecb1p8n1s32vhpo35m61yzrofjepnqk0i2tlum3vhqr")
+	client := &http.Client{}
+	resp, _ := client.Do(req)
+	defer resp.Body.Close()
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	bodyString := string(bodyBytes)
+	log.Println(bodyString)
 	return nil
 }
