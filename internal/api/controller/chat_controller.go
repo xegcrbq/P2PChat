@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/xegcrbq/P2PChat/db"
-	"github.com/xegcrbq/P2PChat/models"
-	"github.com/xegcrbq/P2PChat/tokenizer"
+	models2 "github.com/xegcrbq/P2PChat/internal/models"
+	"github.com/xegcrbq/P2PChat/internal/utils"
 	"io"
 	"log"
 	"net/http"
@@ -19,18 +18,19 @@ type Response struct {
 	MessageHistory string
 }
 type ChatController struct {
-	dialogues     []*models.Dialogue
-	tknz          *tokenizer.Tokenizer
+	dialogues     []*models2.Dialogue
+	tknz          *utils.Tokenizer
 	dialoguePairs map[string]string
 }
 
-func NewChatController(tknz *tokenizer.Tokenizer) *ChatController {
+func NewChatController(tknz *utils.Tokenizer) *ChatController {
 	return &ChatController{
 		tknz:          tknz,
 		dialoguePairs: make(map[string]string),
 	}
 }
-func (cC *ChatController) GetDialogue(users []string) *models.Dialogue {
+
+func (cC *ChatController) GetDialogue(users []string) *models2.Dialogue {
 	if len(users) != 2 {
 		return nil
 	}
@@ -38,7 +38,7 @@ func (cC *ChatController) GetDialogue(users []string) *models.Dialogue {
 	dialogue := cC.FindDialogue(users)
 
 	if dialogue == nil {
-		dialogue = &models.Dialogue{
+		dialogue = &models2.Dialogue{
 			User1: users[0],
 			User2: users[1],
 		}
@@ -46,7 +46,7 @@ func (cC *ChatController) GetDialogue(users []string) *models.Dialogue {
 	}
 	return dialogue
 }
-func (cC *ChatController) FindDialogue(users []string) *models.Dialogue {
+func (cC *ChatController) FindDialogue(users []string) *models2.Dialogue {
 	if len(users) != 2 {
 		return nil
 	}
@@ -58,7 +58,7 @@ func (cC *ChatController) FindDialogue(users []string) *models.Dialogue {
 	}
 	return nil
 }
-func (cC *ChatController) AddMessage(message *models.OldMessage) {
+func (cC *ChatController) AddMessage(message *models2.OldMessage) {
 	users := []string{message.Sender, message.Target}
 	sort.Strings(users)
 	dialogue := cC.GetDialogue(users)
@@ -73,7 +73,7 @@ func (cC *ChatController) ChatWindow(c *fiber.Ctx) error {
 	})
 }
 func (cC *ChatController) Send(c *fiber.Ctx) error {
-	resp := &models.OldMessage{}
+	resp := &models2.OldMessage{}
 	err := json.Unmarshal(c.Body(), &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -83,7 +83,7 @@ func (cC *ChatController) Send(c *fiber.Ctx) error {
 	return nil
 }
 func (cC *ChatController) Update(c *fiber.Ctx) error {
-	resp := &models.OldMessage{}
+	resp := &models2.OldMessage{}
 	err := json.Unmarshal(c.Body(), &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -100,31 +100,6 @@ func (cC *ChatController) Test(c *fiber.Ctx) error {
 	return nil
 }
 
-func (cC *ChatController) UserChat(c *fiber.Ctx) error {
-	sessionId := c.Cookies("session_id")
-	if sessionId == "" {
-		c.SendStatus(http.StatusUnauthorized)
-		return nil
-	}
-	_, token, err := cC.tknz.ParseDataClaims(sessionId)
-	if err != nil || !token.Valid {
-		c.SendStatus(http.StatusUnauthorized)
-		return nil
-	}
-
-	return c.Render("chatWindow2", fiber.Map{})
-}
-func (cC *ChatController) newSession(username string) *fiber.Cookie {
-	expirationTime := time.Now().Add(30 * 24 * time.Hour)
-	cC.dialoguePairs[username] = db.GetRandomName()
-	return cC.tknz.NewJWTCookie("session_id", username, expirationTime)
-}
-func (cC *ChatController) UsernameEntered(c *fiber.Ctx) error {
-	username := c.Params("username")
-	unCookie := cC.newSession(username)
-	c.Cookie(unCookie)
-	return nil
-}
 func (cC *ChatController) SendFile(c *fiber.Ctx) error {
 	fmt.Println(string(c.Body()))
 	return nil

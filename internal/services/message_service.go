@@ -1,9 +1,9 @@
 package services
 
 import (
-	"github.com/xegcrbq/P2PChat/models"
-	"github.com/xegcrbq/P2PChat/models/cmd"
-	"github.com/xegcrbq/P2PChat/repositories"
+	"github.com/xegcrbq/P2PChat/internal/models"
+	"github.com/xegcrbq/P2PChat/internal/models/cmd"
+	"github.com/xegcrbq/P2PChat/internal/repositories"
 )
 
 type MessageRepo interface {

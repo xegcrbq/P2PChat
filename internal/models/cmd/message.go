@@ -1,6 +1,8 @@
 package cmd
 
-import "github.com/xegcrbq/P2PChat/models"
+import (
+	"github.com/xegcrbq/P2PChat/internal/models"
+)
 
 type CreateMessagesByMessage struct {
 	Message *models.Message

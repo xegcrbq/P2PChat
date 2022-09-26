@@ -1,4 +1,4 @@
-package tokenizer
+package utils
 
 import (
 	"github.com/dgrijalva/jwt-go"
@@ -31,6 +31,7 @@ func NewTestTokenizer() *Tokenizer {
 		jwtKey: []byte("djkhgkjdfgndkjnkdjnvkjkdgkjd"),
 	}
 }
+
 func (t *Tokenizer) NewJWTCookie(name, data string, expirationTime time.Time) *fiber.Cookie {
 	dc := &DataClaims{
 		Data: data,

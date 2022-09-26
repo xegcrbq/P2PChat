@@ -2,9 +2,9 @@ package repositories
 
 import (
 	"fmt"
-	"github.com/xegcrbq/P2PChat/db"
-	"github.com/xegcrbq/P2PChat/models"
-	"github.com/xegcrbq/P2PChat/models/cmd"
+	"github.com/xegcrbq/P2PChat/internal/db"
+	"github.com/xegcrbq/P2PChat/internal/models"
+	"github.com/xegcrbq/P2PChat/internal/models/cmd"
 	"testing"
 	"time"
 )

@@ -38,6 +38,7 @@ func (r Session) IsValid() bool {
 	}
 	return true
 }
+
 func (r Session) Equal(r2 Session) bool {
 	if r.UserId != r2.UserId {
 		return false

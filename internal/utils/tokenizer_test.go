@@ -1,4 +1,4 @@
-package tokenizer
+package utils
 
 import (
 	"github.com/dgrijalva/jwt-go"
@@ -10,7 +10,7 @@ import (
 func TestTokenizer(t *testing.T) {
 	tknz := NewTestTokenizer()
 	expiration := time.Now().Add(10 * time.Minute)
-	cookie, _ := tknz.NewJWTCookie("fingerprint", "sfdhdskgjn", expiration)
+	cookie := tknz.NewJWTCookie("fingerprint", "sfdhdskgjn", expiration)
 	dc, token, err := tknz.ParseDataClaims(cookie.Value)
 	assert.Equal(t, dc, &DataClaims{
 		Data:           "sfdhdskgjn",
