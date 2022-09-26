@@ -3,3 +3,8 @@ GET http://127.0.0.1:1080/login/Roman
 
 ###если есть куки открываем чат
 GET http://127.0.0.1:1080/chat/
+###
+POST https://lcab.talk-me.ru/json/v1.0/chat/operator/getList
+
+Content-Type: application/json
+X-Token: xuw9xn7znrz4658f862quecb1p8n1s32vhpo35m61yzrofjepnqk0i2tlum3vhqr

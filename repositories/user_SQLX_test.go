@@ -10,8 +10,11 @@ import (
 var userRepo = NewUserRepoSQLX(db.ConnectSQLXTest())
 
 func TestUserRepoSQLX(t *testing.T) {
-	fmt.Println(userRepo.ReadUserByUserIdAndPassword(&cmd.ReadUserByUserNameAndPassword{
+	fmt.Println(userRepo.ReadUserByUserNameAndPassword(&cmd.ReadUserByUserNameAndPassword{
 		UserName: "admin",
 		Password: "admin",
+	}))
+	fmt.Println(userRepo.ReadUserByUserId(&cmd.ReadUserByUserId{
+		UserId: 2,
 	}))
 }

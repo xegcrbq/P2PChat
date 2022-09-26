@@ -15,9 +15,15 @@ func NewUserRepoSQLX(db *sqlx.DB) *UserRepoSQLX {
 		db: db,
 	}
 }
-func (r *UserRepoSQLX) ReadUserByUserIdAndPassword(cmd *cmd.ReadUserByUserNameAndPassword) (*models.User, error) {
+func (r *UserRepoSQLX) ReadUserByUserNameAndPassword(cmd *cmd.ReadUserByUserNameAndPassword) (*models.User, error) {
 	var user models.User
 	err := r.db.Get(&user,
 		`select * from users where username=$1 and password=$2;`, cmd.UserName, cmd.Password)
+	return &user, err
+}
+func (r *UserRepoSQLX) ReadUserByUserId(cmd *cmd.ReadUserByUserId) (*models.User, error) {
+	var user models.User
+	err := r.db.Get(&user,
+		`select * from users where userid=$1;`, cmd.UserId)
 	return &user, err
 }
