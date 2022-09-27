@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <link rel="stylesheet" href="styles2.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="dialogueMain">
@@ -67,7 +67,7 @@
             function addMessage(text = '', author = 0) {
                 const newMessage = document.createElement('div')
                 newMessage.classList.add('message')
-                if (author != 0) {
+                if (author != 1) {
                     newMessage.classList.add('green')
                 }
                 newMessage.innerText = text
@@ -75,7 +75,6 @@
                 messageContainer.classList.add('messageContainer')
                 messageContainer.appendChild(newMessage)
                 messageHistory.appendChild(messageContainer)
-                console.log(text)
             }
             function sendMessage(){
                 if (inputField.value != ""){
@@ -89,7 +88,6 @@
 
                     formData.append("photo", inputFile.files[0]);
                     postFile('uploadFile/', formData);
-                    console.log(inputFile.files[0])
                 }
             }
             update()
@@ -98,9 +96,7 @@
                 const resp = (await postData('update/v2/', {
                     MessageCount: document.querySelectorAll('.messageContainer').length,
                 }).then(r => r.json()));
-                // console.log(resp.length)
                 resp.forEach((element) => {
-                    console.log(element)
                     addMessage(element['MessageText'],element['SenderId'])
                 })
             }

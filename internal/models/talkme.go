@@ -17,3 +17,14 @@ type TalkMeMessageGetListResult struct {
 	Messages []TalkMeMessage `json:"messages"`
 	ClientId string          `json:"clientId"`
 }
+
+type TalkMeWebHook struct {
+	Data TalkMeWebHookData `json:"data"`
+}
+type TalkMeWebHookData struct {
+	Message TalkMeMessage `json:"message"`
+	Client  TalkMeClient  `json:"client"`
+}
+type TalkMeClient struct {
+	ClientId string `json:"clientId"`
+}

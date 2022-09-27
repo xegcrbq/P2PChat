@@ -14,7 +14,6 @@ const (
 	listenAddr       = "0.0.0.0:8080"
 	postgressDb      = "postgres://root:password@localhost:5432/docker"
 	shutdown_timeout = 5
-	X_Token          = "xuw9xn7znrz4658f862quecb1p8n1s32vhpo35m61yzrofjepnqk0i2tlum3vhqr"
 )
 
 func main() {

@@ -128,32 +128,47 @@ func (c *TalkmeController) readAndUpdateDB(dateEnd time.Time, adminId int32) {
 			continue
 		}
 		for _, message := range client.Messages {
-			parsedTime, err := time.Parse("2006-01-02 15:04:05", message.DateTime)
-			if err != nil {
-				log.Fatal(err)
-			}
-			if message.WhoSend == "operator" {
-				c.dataController.Execute(commands.CreateMessagesByMessage{Message: &models.Message{
-					SenderId:     adminId,
-					ReaderId:     answU.User.UserId,
-					OrderId:      1,
-					MessageText:  message.Text,
-					AttachmentId: 0,
-					SendTime:     parsedTime,
-					TalkMeId:     message.Id,
-				}})
-			} else {
-				c.dataController.Execute(commands.CreateMessagesByMessage{Message: &models.Message{
-					SenderId:     answU.User.UserId,
-					ReaderId:     adminId,
-					OrderId:      1,
-					MessageText:  message.Text,
-					AttachmentId: 0,
-					SendTime:     parsedTime,
-					TalkMeId:     message.Id,
-				}})
-			}
-
+			c.WriteMessageFromTmeMessage(&message, answU.User.UserId, adminId)
 		}
 	}
+}
+func (c *TalkmeController) WriteMessageFromTmeMessage(tmeM *models.TalkMeMessage, userId, adminId int32) *models.Answer {
+	parsedTime, err := time.Parse("2006-01-02 15:04:05", tmeM.DateTime)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if tmeM.WhoSend == "operator" {
+		return c.dataController.Execute(commands.CreateMessagesByMessage{Message: &models.Message{
+			SenderId:     adminId,
+			ReaderId:     userId,
+			OrderId:      1,
+			MessageText:  tmeM.Text,
+			AttachmentId: 0,
+			SendTime:     parsedTime,
+			TalkMeId:     tmeM.Id,
+		}})
+	} else {
+		return c.dataController.Execute(commands.CreateMessagesByMessage{Message: &models.Message{
+			SenderId:     userId,
+			ReaderId:     adminId,
+			OrderId:      1,
+			MessageText:  tmeM.Text,
+			AttachmentId: 0,
+			SendTime:     parsedTime,
+			TalkMeId:     tmeM.Id,
+		}})
+	}
+}
+func (c *TalkmeController) MessageFromWHBytes(data []byte) error {
+	var twh models.TalkMeWebHook
+	err := json.Unmarshal(data, &twh)
+	if err != nil {
+		return err
+	}
+	answA := c.dataController.Execute(commands.ReadUserByUserName{UserName: "admin"})
+	if answA.Err != nil {
+		return answA.Err
+	}
+	answU := c.dataController.Execute(commands.ReadUserByUserName{UserName: twh.Data.Client.ClientId})
+	return c.WriteMessageFromTmeMessage(&twh.Data.Message, answU.User.UserId, answA.User.UserId).Err
 }

@@ -12,7 +12,3 @@ Content-Type: application/json
 "Message": "ssdfsdf"
 }
 ###
-POST https://lcab.talk-me.ru/json/v1.0/chat/operator/getList
-
-Content-Type: application/json
-X-Token: xuw9xn7znrz4658f862quecb1p8n1s32vhpo35m61yzrofjepnqk0i2tlum3vhqr

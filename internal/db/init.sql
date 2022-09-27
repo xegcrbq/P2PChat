@@ -33,14 +33,16 @@ create table Messages(
     Foreign Key(AttachmentId) references Attachments(AttachmentId),
     SendTime timestamp WITH TIME ZONE NOT NULL,
     IsRead bit DEFAULT 0::bit,
-    TalkMeId integer unique 
+    TalkMeId integer unique
 );
 
 INSERT INTO
     users (UserId, UserName, Password, IsTrader)
 VALUES
     (1,'admin', 'admin', 1::bit),
-    (2,'user', 'password', 0::bit);
+    (2,'user', 'password', 0::bit),
+    (3,'login', 'password', 0::bit);
+
 
 insert into
     orders(OrderId, SellerId, SellerTicker, SellerAmount, BuyerId, BuyerTicker, BuyerAmount)
