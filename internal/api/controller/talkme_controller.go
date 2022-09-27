@@ -27,7 +27,7 @@ func NewTalkmeController(xToken string, controller *DataController) *TalkmeContr
 }
 
 // AutoUpdate в начале обновляет бд до новейшего состояния, затем каждые duration отправляет на talkme запрос на получение последних сообщений и вносит их в бд
-func (c *TalkmeController) AutoUpdate(duration time.Duration) {
+func (c *TalkmeController) Update(duration time.Duration, infinity bool) {
 	answA := c.dataController.Execute(commands.ReadUserByUserName{UserName: "admin"})
 	if answA.Err != nil || answA.User == nil {
 		return
@@ -48,15 +48,16 @@ func (c *TalkmeController) AutoUpdate(duration time.Duration) {
 		c.readAndUpdateDB(dateEnd, answA.User.UserId)
 		c.dateStart = dateEnd
 	}
-	for range time.Tick(duration) {
-		dateEnd := time.Now()
-		if c.dateStart.Add(time.Hour*24*7).Unix() < dateEnd.Unix() {
-			dateEnd = c.dateStart.Add(time.Hour * 24 * 7)
+	if infinity {
+		for range time.Tick(duration) {
+			dateEnd := time.Now()
+			if c.dateStart.Add(time.Hour*24*7).Unix() < dateEnd.Unix() {
+				dateEnd = c.dateStart.Add(time.Hour * 24 * 7)
+			}
+			c.readAndUpdateDB(dateEnd, answA.User.UserId)
+			c.dateStart = dateEnd
 		}
-		c.readAndUpdateDB(dateEnd, answA.User.UserId)
-		c.dateStart = dateEnd
 	}
-
 }
 
 // readMessagesForPeriod отправляет на talkme запрос на получение последних сообщений
@@ -164,6 +165,9 @@ func (c *TalkmeController) MessageFromWHBytes(data []byte) error {
 	err := json.Unmarshal(data, &twh)
 	if err != nil {
 		return err
+	}
+	if !twh.Validate() {
+		return models.ErrInvalidSC
 	}
 	answA := c.dataController.Execute(commands.ReadUserByUserName{UserName: "admin"})
 	if answA.Err != nil {

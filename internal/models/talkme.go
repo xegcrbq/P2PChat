@@ -1,5 +1,7 @@
 package models
 
+import "github.com/xegcrbq/P2PChat/internal/db"
+
 type TalkMeMessageGetListAnswer struct {
 	Success bool                         `json:"success"`
 	Result  []TalkMeMessageGetListResult `json:"result"`
@@ -19,7 +21,8 @@ type TalkMeMessageGetListResult struct {
 }
 
 type TalkMeWebHook struct {
-	Data TalkMeWebHookData `json:"data"`
+	Data      TalkMeWebHookData `json:"data"`
+	SecretKey string            `json:"secretKey"`
 }
 type TalkMeWebHookData struct {
 	Message TalkMeMessage `json:"message"`
@@ -27,4 +30,11 @@ type TalkMeWebHookData struct {
 }
 type TalkMeClient struct {
 	ClientId string `json:"clientId"`
+}
+
+func (wh *TalkMeWebHook) Validate() bool {
+	if wh.SecretKey == db.GoDotEnvVariable("WHsecretKey") {
+		return true
+	}
+	return false
 }

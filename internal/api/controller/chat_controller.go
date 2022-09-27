@@ -147,5 +147,10 @@ func (c *ChatController) UpdateV2(ctx *fiber.Ctx) error {
 	return ctx.Send(sendData)
 }
 func (c *ChatController) WH(ctx *fiber.Ctx) error {
-	return c.talkmeController.MessageFromWHBytes(ctx.Body())
+	err := c.talkmeController.MessageFromWHBytes(ctx.Body())
+	if err == models2.ErrInvalidSC {
+		ctx.SendStatus(http.StatusUnauthorized)
+		return nil
+	}
+	return err
 }

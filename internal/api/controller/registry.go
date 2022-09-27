@@ -7,6 +7,7 @@ import (
 	"github.com/xegcrbq/P2PChat/internal/db/repositories"
 	"github.com/xegcrbq/P2PChat/internal/services"
 	"github.com/xegcrbq/P2PChat/internal/utils"
+	"time"
 )
 
 type Registry struct {
@@ -25,6 +26,6 @@ func NewRegistry(log *logrus.Entry, repository *db.Repository) *Registry {
 	talkmeController := NewTalkmeController(db.GoDotEnvVariable("XToken"), dataController)
 	registry.ChatController = NewChatController(tokenBytes, dataController, talkmeController)
 	registry.AuthController = NewAuthController(tokenBytes)
-
+	talkmeController.Update(time.Second*10, false)
 	return registry
 }
