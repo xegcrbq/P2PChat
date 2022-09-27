@@ -25,12 +25,10 @@
             const messageHistory = document.querySelector('.messageHistory');
             inputField.addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
-                    console.log('enter')
                     sendMessage()
                 }
             });
             inputButton.addEventListener('click', function (e) {
-                console.log('click')
                 sendMessage()
             });
             async function postData(url = '', data = {}) {
@@ -66,10 +64,10 @@
                 });
                 return response; // parses JSON response into native JavaScript objects
             }
-            function addMessage(text = '', your = true) {
+            function addMessage(text = '', author = 0) {
                 const newMessage = document.createElement('div')
                 newMessage.classList.add('message')
-                if (!your) {
+                if (author != 0) {
                     newMessage.classList.add('green')
                 }
                 newMessage.innerText = text
@@ -82,7 +80,7 @@
             function sendMessage(){
                 if (inputField.value != ""){
                     addMessage(inputField.value)
-                    postData('/send/', {Message:inputField.value})
+                    postData('send/', {Message:inputField.value})
                     inputField.value = ""
                 }
 
@@ -90,22 +88,21 @@
                     let formData = new FormData();
 
                     formData.append("photo", inputFile.files[0]);
-                    postFile('/uploadFile/', formData);
+                    postFile('uploadFile/', formData);
                     console.log(inputFile.files[0])
                 }
             }
+            update()
             setInterval(update, 5000);
             async function update () {
-                const resp = (await postData('/update/v2/', {
+                const resp = (await postData('update/v2/', {
                     MessageCount: document.querySelectorAll('.messageContainer').length,
-                }));
-                if (resp.ok) {
-                    console.log(resp)
-                    console.log(resp.json())
-                }else {
-                    console.log(resp)
-                    console.log("wrong resp")
-                }
+                }).then(r => r.json()));
+                // console.log(resp.length)
+                resp.forEach((element) => {
+                    console.log(element)
+                    addMessage(element['MessageText'],element['SenderId'])
+                })
             }
         </script>
     </div>

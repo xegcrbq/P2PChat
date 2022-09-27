@@ -16,29 +16,29 @@ package services
 //	}
 //}
 //
-//func (s *SessionService) IsSessionAvailable(cmd models.CommandDeleteSessionByRefreshToken) (bool, error) {
-//	session, err := s.sessionRepo.ReadSessionByRefreshToken(&models.QueryReadSessionByRefreshToken{RefreshToken: cmd.RefreshToken})
+//func (s *SessionService) IsSessionAvailable(commands models.CommandDeleteSessionByRefreshToken) (bool, error) {
+//	session, err := s.sessionRepo.ReadSessionByRefreshToken(&models.QueryReadSessionByRefreshToken{RefreshToken: commands.RefreshToken})
 //	if err == nil && session != nil {
 //		return true, nil
 //	}
 //	return false, err
 //}
-//func (s *SessionService) GetSession(cmd models.QueryReadSessionByRefreshToken) (*models.Session, error) {
-//	session, err := s.sessionRepo.ReadSessionByRefreshToken(&cmd)
+//func (s *SessionService) GetSession(commands models.QueryReadSessionByRefreshToken) (*models.Session, error) {
+//	session, err := s.sessionRepo.ReadSessionByRefreshToken(&commands)
 //	return session, err
 //}
-//func (s *SessionService) InsertSession(cmd models.CommandCreateSession) error {
-//	err := s.sessionRepo.SaveSession(&cmd)
+//func (s *SessionService) InsertSession(commands models.CommandCreateSession) error {
+//	err := s.sessionRepo.SaveSession(&commands)
 //	return err
 //}
-//func (s *SessionService) DeleteSession(cmd models.CommandDeleteSessionByRefreshToken) error {
-//	found, err := s.IsSessionAvailable(cmd)
+//func (s *SessionService) DeleteSession(commands models.CommandDeleteSessionByRefreshToken) error {
+//	found, err := s.IsSessionAvailable(commands)
 //	if !found {
 //		return ErrDataNotFound
 //	}
 //	if err != nil {
 //		return err
 //	}
-//	err = s.sessionRepo.DeleteSessionByRefreshToken(&cmd)
+//	err = s.sessionRepo.DeleteSessionByRefreshToken(&commands)
 //	return err
 //}

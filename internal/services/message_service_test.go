@@ -3,7 +3,7 @@ package services
 import (
 	"fmt"
 	"github.com/xegcrbq/P2PChat/internal/db"
-	"github.com/xegcrbq/P2PChat/internal/repositories"
+	"github.com/xegcrbq/P2PChat/internal/db/repositories"
 	"testing"
 )
 

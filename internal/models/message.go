@@ -14,6 +14,7 @@ type Message struct {
 	AttachmentId int32     `db:"attachmentid"`
 	SendTime     time.Time `db:"sendtime"`
 	IsRead       bool      `db:"isread"`
+	TalkMeId     int32     `db:"talkmeid"`
 }
 
 type OldMessage struct {

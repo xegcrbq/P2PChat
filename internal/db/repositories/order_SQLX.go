@@ -3,7 +3,7 @@ package repositories
 import (
 	"github.com/jmoiron/sqlx"
 	"github.com/xegcrbq/P2PChat/internal/models"
-	"github.com/xegcrbq/P2PChat/internal/models/cmd"
+	"github.com/xegcrbq/P2PChat/internal/models/commands"
 )
 
 type OrderRepoSQLX struct {
@@ -16,7 +16,7 @@ func NewOrderRepoSQLX(db *sqlx.DB) *OrderRepoSQLX {
 	}
 }
 
-func (r *OrderRepoSQLX) CreateOrderByOrder(cmd *cmd.CreateOrderByOrder) error {
+func (r *OrderRepoSQLX) CreateOrderByOrder(cmd *commands.CreateOrderByOrder) error {
 	order := cmd.Order
 	_, err := r.db.Exec(`
 		insert into 
@@ -26,21 +26,21 @@ func (r *OrderRepoSQLX) CreateOrderByOrder(cmd *cmd.CreateOrderByOrder) error {
 	return err
 }
 
-func (r *OrderRepoSQLX) ReadOrderByOrderId(cmd *cmd.ReadOrderByOrderId) (*models.Order, error) {
+func (r *OrderRepoSQLX) ReadOrderByOrderId(cmd *commands.ReadOrderByOrderId) (*models.Order, error) {
 	var order models.Order
 	err := r.db.Get(&order,
 		`select * from orders where orderid=$1;`, cmd.OrderId)
 	return &order, err
 }
 
-func (r *OrderRepoSQLX) ReadOrdersByBuyerId(cmd *cmd.ReadOrdersByBuyerId) (*[]models.Order, error) {
+func (r *OrderRepoSQLX) ReadOrdersByBuyerId(cmd *commands.ReadOrdersByBuyerId) (*[]models.Order, error) {
 	var orders []models.Order
 	err := r.db.Select(&orders,
 		`select * from orders where buyerid=$1;`, cmd.BuyerId)
 	return &orders, err
 }
 
-func (r *OrderRepoSQLX) ReadOrdersBySellerId(cmd *cmd.ReadOrdersBySellerId) (*[]models.Order, error) {
+func (r *OrderRepoSQLX) ReadOrdersBySellerId(cmd *commands.ReadOrdersBySellerId) (*[]models.Order, error) {
 	var orders []models.Order
 	err := r.db.Select(&orders,
 		`select * from orders where sellerid=$1;`, cmd.SellerId)

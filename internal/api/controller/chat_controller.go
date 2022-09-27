@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	models2 "github.com/xegcrbq/P2PChat/internal/models"
+	"github.com/xegcrbq/P2PChat/internal/models/commands"
 	"github.com/xegcrbq/P2PChat/internal/utils"
 	"io"
 	"log"
@@ -18,15 +19,17 @@ type Response struct {
 	MessageHistory string
 }
 type ChatController struct {
-	dialogues     []*models2.Dialogue
-	tknz          *utils.Tokenizer
-	dialoguePairs map[string]string
+	dialogues      []*models2.Dialogue
+	tknz           *utils.Tokenizer
+	dialoguePairs  map[string]string
+	dataController *DataController
 }
 
-func NewChatController(tknz *utils.Tokenizer) *ChatController {
+func NewChatController(tknz *utils.Tokenizer, dataController *DataController) *ChatController {
 	return &ChatController{
-		tknz:          tknz,
-		dialoguePairs: make(map[string]string),
+		tknz:           tknz,
+		dialoguePairs:  make(map[string]string),
+		dataController: dataController,
 	}
 }
 
@@ -148,5 +151,73 @@ func (cC *ChatController) SendMessageToTalkMe(c *fiber.Ctx) error {
 	}
 	bodyString := string(bodyBytes)
 	log.Println(bodyString)
+	//writing message in db
+	//answU := cC.dataController.Execute(commands.ReadUserByUserName{UserName: data.Data})
+	//if answU.Err != nil || answU.User == nil {
+	//	return answU.Err
+	//}
+	//answA := cC.dataController.Execute(commands.ReadUserByUserName{UserName: "admin"})
+	//if answA.Err != nil || answA.User == nil {
+	//	return answA.Err
+	//}
+	//answM := cC.dataController.Execute(commands.CreateMessagesByMessage{Message: &models2.Message{
+	//	SenderId:     answU.User.UserId,
+	//	ReaderId:     answA.User.UserId,
+	//	OrderId:      1,
+	//	MessageText:  message.Message,
+	//	AttachmentId: 0,
+	//	SendTime:     time.Now(),
+	//}})
+	//if answM.Err != nil {
+	//	return answM.Err
+	//}
+	return nil
+}
+func (cC *ChatController) UpdateV2(c *fiber.Ctx) error {
+	data, tkn, err := cC.tknz.ParseDataClaims(c.Cookies("session_id"))
+	if !(tkn.Valid) || err != nil {
+		c.SendStatus(http.StatusUnauthorized)
+		return nil
+	}
+	messageCount := struct {
+		MessageCount int
+	}{}
+	err = json.Unmarshal(c.Body(), &messageCount)
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return nil
+	}
+	answ := cC.dataController.Execute(commands.ReadUserByUserName{UserName: data.Data})
+	if answ.Err != nil || answ.User == nil {
+		c.SendStatus(http.StatusUnauthorized)
+		return nil
+	}
+	userId := answ.User.UserId
+	answ = cC.dataController.Execute(commands.ReadMessagesByUserId{UserId: userId})
+	if answ.Err != nil || answ.Messages == nil {
+		c.SendStatus(http.StatusUnauthorized)
+		return nil
+	}
+	if len(*answ.Messages) <= messageCount.MessageCount || messageCount.MessageCount < 0 {
+		return nil
+	}
+	messagesToSend := *answ.Messages
+	messagesToSend = messagesToSend[messageCount.MessageCount:]
+	for i := range messagesToSend {
+		if userId == messagesToSend[i].SenderId {
+			messagesToSend[i].SenderId = 0
+		} else {
+			messagesToSend[i].SenderId = 1
+		}
+
+	}
+	sendData, err := json.Marshal(messagesToSend)
+	if err != nil {
+		return err
+	}
+	return c.Send(sendData)
+}
+func (cC *ChatController) WH(c *fiber.Ctx) error {
+	fmt.Println(c.String())
 	return nil
 }

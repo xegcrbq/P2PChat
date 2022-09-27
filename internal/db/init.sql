@@ -31,8 +31,9 @@ create table Messages(
     MessageText text,
     AttachmentId integer NULL,
     Foreign Key(AttachmentId) references Attachments(AttachmentId),
-    SendTime time without time zone NOT NULL,
-    IsRead bit DEFAULT 0::bit
+    SendTime timestamp WITH TIME ZONE NOT NULL,
+    IsRead bit DEFAULT 0::bit,
+    TalkMeId integer unique 
 );
 
 INSERT INTO
@@ -45,7 +46,10 @@ insert into
     orders(OrderId, SellerId, SellerTicker, SellerAmount, BuyerId, BuyerTicker, BuyerAmount)
 VALUES
     (1, 1, 'BTC', 0.0002, 2, 'RUB', 800);
+
 insert into
     attachments(attachmentid, path)
 values
-    (1, './test.http')
+    (1, './test.http');
+
+select * from messages where SenderId=1 ORDER BY SendTime desc LIMIT 1;

@@ -13,6 +13,7 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/stretchr/testify v1.8.0
 	github.com/thanhpk/randstr v1.0.4
+	gopkg.in/errgo.v2 v2.1.0
 )
 
 require (
