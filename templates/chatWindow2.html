@@ -7,11 +7,9 @@
 </head>
 <body>
     <div class="dialogueMain">
-        <div class="nickname">{{.nickname}}</div>
-
+        <div class="nickname">Anonymous</div>
         <div class="messageHistory">
-            <div class="message">Hello</div>
-            <div class="message green">asdaasssssssssssssssd</div>
+
         </div>
         <div class="messageInput">
             <input class="inputField" type="text">
@@ -24,27 +22,14 @@
             const inputField = document.querySelector('.inputField');
             const inputButton = document.querySelector('.inputButton');
             const inputFile = document.querySelector('.inputFile');
-            const reader = new FileReader();
+            const messageHistory = document.querySelector('.messageHistory');
             inputField.addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
-                    console.log('enter')
-                    if (inputFile.files.length != 0){
-                        let formData = new FormData();
-                        formData.append("photo", inputFile.files[0]);
-                        postFile('/uploadFile/', formData);
-                        console.log(inputFile.files[0])
-                    }
+                    sendMessage()
                 }
             });
             inputButton.addEventListener('click', function (e) {
-                    console.log('click')
-                if (inputFile.files.length != 0){
-                    let formData = new FormData();
-
-                    formData.append("photo", inputFile.files[0]);
-                    postFile('/uploadFile/', formData);
-                    console.log(inputFile.files[0])
-                }
+                sendMessage()
             });
             async function postData(url = '', data = {}) {
                 // Default options are marked with *
@@ -56,6 +41,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
+                    cookie: document.cookie,
                     redirect: 'follow', // manual, *follow, error
                     referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
                     body: JSON.stringify(data) // body data type must match "Content-Type" header
@@ -77,6 +63,42 @@
                     body: data // body data type must match "Content-Type" header
                 });
                 return response; // parses JSON response into native JavaScript objects
+            }
+            function addMessage(text = '', author = 0) {
+                const newMessage = document.createElement('div')
+                newMessage.classList.add('message')
+                if (author != 1) {
+                    newMessage.classList.add('green')
+                }
+                newMessage.innerText = text
+                const messageContainer = document.createElement('div')
+                messageContainer.classList.add('messageContainer')
+                messageContainer.appendChild(newMessage)
+                messageHistory.appendChild(messageContainer)
+            }
+            function sendMessage(){
+                if (inputField.value != ""){
+                    addMessage(inputField.value)
+                    postData('send/', {Message:inputField.value})
+                    inputField.value = ""
+                }
+
+                if (inputFile.files.length != 0){
+                    let formData = new FormData();
+
+                    formData.append("photo", inputFile.files[0]);
+                    postFile('uploadFile/', formData);
+                }
+            }
+            update()
+            setInterval(update, 5000);
+            async function update () {
+                const resp = (await postData('update/v2/', {
+                    MessageCount: document.querySelectorAll('.messageContainer').length,
+                }).then(r => r.json()));
+                resp.forEach((element) => {
+                    addMessage(element['MessageText'],element['SenderId'])
+                })
             }
         </script>
     </div>

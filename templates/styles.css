@@ -17,24 +17,28 @@ div.nickname{
     background-color: #fff;
     text-align: center;
 }
+.messageContainer{
+    width: 100%;
+    height: 50px;
+}
 .message {
     border: 2px solid #dedede;
     background-color: #fff;
     border-radius: 5px;
     padding: 10px;
-    margin: 10px 10px;
+    margin: 0px 10px;
     width: min-content;
+    height: min-content;
 }
 .green {
     border-color: #ccc;
     background-color: #efc;
-    display: inline-block;
-    vertical-align: middle;
     float: right;
 }
 .messageHistory{
+    overflow: auto;
     width: 100%;
-    height: calc(100% - 100px);
+    height: calc(100% - 120px);
 }
 
 .messageInput {
@@ -45,10 +49,6 @@ div.nickname{
     border-radius: 10px;
     height: 60px;
 }
-/*.inputField{*/
-/*    border: none;*/
-/*    margin: 5px 5px;*/
-/*}*/
 .inputField{
     height: calc(100% - 40px);
     width: calc(100% - 20px);
