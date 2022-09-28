@@ -23,10 +23,9 @@ class MySocket {
             this.showMessage(e.data);
         }
         socket.onopen =  ()=> {
-            console.log("socket opened")
         };
         socket.onclose = ()=>{
-            console.log("socket close")
+            this.reconnect()
         }
     }
     getCookie(cookieName) {
@@ -49,4 +48,11 @@ class MySocket {
         messageContainer.appendChild(newMessage)
         this.messageHistory.appendChild(messageContainer)
     }
+    async reconnect() {
+        await delay(5000);
+        this.connectSocket()
+    }
+}
+function delay(time) {
+    return new Promise(resolve => setTimeout(resolve, time));
 }

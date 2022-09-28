@@ -141,9 +141,8 @@ func (c *TalkMeController) readAndUpdateDB(dateEnd time.Time, adminId int32) {
 		if founded {
 			sendData, err := json.Marshal(converters.TalkMeMessagesToMessages(client.Messages))
 			if err == nil {
-				for m, v := range sockets {
+				for _, v := range sockets {
 					v.Emit(sendData)
-					fmt.Println(fmt.Sprintf("ClientId: %v\nUUID: %v\n Messages: %v", client.ClientId, m, string(sendData)))
 				}
 			}
 		}
