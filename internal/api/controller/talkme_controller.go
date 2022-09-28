@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/xegcrbq/P2PChat/internal/models"
 	"github.com/xegcrbq/P2PChat/internal/models/commands"
+	"github.com/xegcrbq/P2PChat/internal/models/converters"
+	"github.com/xegcrbq/P2PChat/internal/services"
 	"io"
 	"log"
 	"net/http"
@@ -12,22 +14,24 @@ import (
 	"time"
 )
 
-type TalkmeController struct {
+type TalkMeController struct {
 	xToken         string
 	dataController *DataController
+	socketService  *services.SocketService
 	dateStart      time.Time
 }
 
-func NewTalkmeController(xToken string, controller *DataController) *TalkmeController {
-	return &TalkmeController{
+func NewTalkMeController(xToken string, controller *DataController, socketService *services.SocketService) *TalkMeController {
+	return &TalkMeController{
 		xToken:         xToken,
 		dataController: controller,
+		socketService:  socketService,
 		dateStart:      time.Now().Add(-time.Hour * 24 * 180),
 	}
 }
 
 // AutoUpdate в начале обновляет бд до новейшего состояния, затем каждые duration отправляет на talkme запрос на получение последних сообщений и вносит их в бд
-func (c *TalkmeController) Update(duration time.Duration, infinity bool) {
+func (c *TalkMeController) Update(duration time.Duration, endlessly bool) {
 	answA := c.dataController.Execute(commands.ReadUserByUserName{UserName: "admin"})
 	if answA.Err != nil || answA.User == nil {
 		return
@@ -48,20 +52,22 @@ func (c *TalkmeController) Update(duration time.Duration, infinity bool) {
 		c.readAndUpdateDB(dateEnd, answA.User.UserId)
 		c.dateStart = dateEnd
 	}
-	if infinity {
-		for range time.Tick(duration) {
-			dateEnd := time.Now()
-			if c.dateStart.Add(time.Hour*24*7).Unix() < dateEnd.Unix() {
-				dateEnd = c.dateStart.Add(time.Hour * 24 * 7)
+	if endlessly {
+		go func() {
+			for range time.Tick(duration) {
+				dateEnd := time.Now()
+				if c.dateStart.Add(time.Hour*24*7).Unix() < dateEnd.Unix() {
+					dateEnd = c.dateStart.Add(time.Hour * 24 * 7)
+				}
+				c.readAndUpdateDB(dateEnd, answA.User.UserId)
+				c.dateStart = dateEnd
 			}
-			c.readAndUpdateDB(dateEnd, answA.User.UserId)
-			c.dateStart = dateEnd
-		}
+		}()
 	}
 }
 
 // readMessagesForPeriod отправляет на talkme запрос на получение последних сообщений
-func (c *TalkmeController) readMessagesForPeriod(start, end time.Time) (*models.TalkMeMessageGetListAnswer, error) {
+func (c *TalkMeController) readMessagesForPeriod(start, end time.Time) (*models.TalkMeMessageGetListAnswer, error) {
 	URL := "https://lcab.talk-me.ru/json/v1.0/chat/message/getList"
 	startString := fmt.Sprintf("%.4v-%.2v-%.2v %.2v:%.2v:%.2v", start.Year(), int(start.Month()), start.Day(), start.Hour(), start.Minute(), start.Second())
 	endString := fmt.Sprintf("%.4v-%.2v-%.2v %.2v:%.2v:%.2v", end.Year(), int(end.Month()), end.Day(), end.Hour(), end.Minute(), end.Second())
@@ -92,7 +98,7 @@ func (c *TalkmeController) readMessagesForPeriod(start, end time.Time) (*models.
 }
 
 // messagesFromOperator отфильтровывает сообщения, оставляет только те, отправители которых есть в нашей бд
-func (c *TalkmeController) messagesFromOperator(messageList *models.TalkMeMessageGetListAnswer) *[]models.TalkMeMessageGetListResult {
+func (c *TalkMeController) messagesFromOperator(messageList *models.TalkMeMessageGetListAnswer) *[]models.TalkMeMessageGetListResult {
 	var result []models.TalkMeMessageGetListResult
 	for _, inputResult := range messageList.Result {
 		answ := c.dataController.Execute(commands.ReadUserByUserName{UserName: inputResult.ClientId})
@@ -115,7 +121,7 @@ func (c *TalkmeController) messagesFromOperator(messageList *models.TalkMeMessag
 }
 
 // readAndUpdateDB запрос на talkme + внесение в бд
-func (c *TalkmeController) readAndUpdateDB(dateEnd time.Time, adminId int32) {
+func (c *TalkMeController) readAndUpdateDB(dateEnd time.Time, adminId int32) {
 	answ, err := c.readMessagesForPeriod(c.dateStart, dateEnd)
 	if err != nil {
 		log.Fatal(err)
@@ -129,11 +135,24 @@ func (c *TalkmeController) readAndUpdateDB(dateEnd time.Time, adminId int32) {
 			continue
 		}
 		for _, message := range client.Messages {
-			c.WriteMessageFromTmeMessage(&message, answU.User.UserId, adminId)
+			c.writeMessageFromTmeMessage(&message, answU.User.UserId, adminId)
 		}
+		sockets, founded := c.socketService.Get(client.ClientId)
+		if founded {
+			sendData, err := json.Marshal(converters.TalkMeMessagesToMessages(client.Messages))
+			if err == nil {
+				for m, v := range sockets {
+					v.Emit(sendData)
+					fmt.Println(fmt.Sprintf("ClientId: %v\nUUID: %v\n Messages: %v", client.ClientId, m, string(sendData)))
+				}
+			}
+		}
+
 	}
 }
-func (c *TalkmeController) WriteMessageFromTmeMessage(tmeM *models.TalkMeMessage, userId, adminId int32) *models.Answer {
+
+// writeMessageFromTmeMessage в бд записывается сообщение talk me
+func (c *TalkMeController) writeMessageFromTmeMessage(tmeM *models.TalkMeMessage, userId, adminId int32) *models.Answer {
 	parsedTime, err := time.Parse("2006-01-02 15:04:05", tmeM.DateTime)
 	if err != nil {
 		log.Fatal(err)
@@ -160,7 +179,9 @@ func (c *TalkmeController) WriteMessageFromTmeMessage(tmeM *models.TalkMeMessage
 		}})
 	}
 }
-func (c *TalkmeController) MessageFromWHBytes(data []byte) error {
+
+// MessageFromWHBytes получает тело вебхука и пишет данные из него в бд
+func (c *TalkMeController) MessageFromWHBytes(data []byte) error {
 	var twh models.TalkMeWebHook
 	err := json.Unmarshal(data, &twh)
 	if err != nil {
@@ -174,5 +195,5 @@ func (c *TalkmeController) MessageFromWHBytes(data []byte) error {
 		return answA.Err
 	}
 	answU := c.dataController.Execute(commands.ReadUserByUserName{UserName: twh.Data.Client.ClientId})
-	return c.WriteMessageFromTmeMessage(&twh.Data.Message, answU.User.UserId, answA.User.UserId).Err
+	return c.writeMessageFromTmeMessage(&twh.Data.Message, answU.User.UserId, answA.User.UserId).Err
 }

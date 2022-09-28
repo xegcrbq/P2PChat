@@ -19,15 +19,13 @@ type Response struct {
 type ChatController struct {
 	dialogues        []*models2.Dialogue
 	tknz             *utils.Tokenizer
-	dialoguePairs    map[string]string
 	dataController   *DataController
-	talkmeController *TalkmeController
+	talkmeController *TalkMeController
 }
 
-func NewChatController(tknz *utils.Tokenizer, dataController *DataController, talkmeController *TalkmeController) *ChatController {
+func NewChatController(tknz *utils.Tokenizer, dataController *DataController, talkmeController *TalkMeController) *ChatController {
 	return &ChatController{
 		tknz:             tknz,
-		dialoguePairs:    make(map[string]string),
 		dataController:   dataController,
 		talkmeController: talkmeController,
 	}

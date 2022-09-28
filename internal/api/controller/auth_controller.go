@@ -33,7 +33,7 @@ func (cC *AuthController) UserChat(c *fiber.Ctx) error {
 		}
 		return nil
 	}
-	return c.Render("chatWindow2", fiber.Map{})
+	return c.Render("chat", fiber.Map{})
 }
 
 func (cC *AuthController) UsernameEntered(c *fiber.Ctx) error {

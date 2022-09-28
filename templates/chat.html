@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="dialogueMain">
+        <div class="nickname">Anonymous</div>
+        <div class="messageHistory">
+
+        </div>
+        <div class="messageInput">
+            <input class="inputField" type="text">
+            <div>
+                <input class="inputFile" type="file">
+                <input class="inputButton" type="submit">
+            </div>
+        </div>
+<!--        <script src="old.js"></script>-->
+        <script src="soket.js"></script>
+        <script>
+            var mysocket = new MySocket()
+            mysocket.connectSocket()
+            const inputField = document.querySelector('.inputField');
+            const inputButton = document.querySelector('.inputButton');
+            inputField.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    mysocket.send()
+                }
+            });
+            inputButton.addEventListener('click', function (e) {
+                mysocket.send()
+            });
+        </script>
+    </div>
+</body>
+</html>

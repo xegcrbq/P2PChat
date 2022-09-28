@@ -11,21 +11,24 @@ import (
 )
 
 type Registry struct {
-	ChatController *ChatController
-	AuthController *AuthController
+	ChatController   *ChatController
+	AuthController   *AuthController
+	SocketController *SocketController
 }
 
 func NewRegistry(log *logrus.Entry, repository *db.Repository) *Registry {
 	//serviceRegistry := service.NewRegistry(log, repository)
 
 	registry := &Registry{}
-	tokenBytes := utils.NewTokenizer([]byte(randstr.Hex(10)))
+	tokenizer := utils.NewTokenizer([]byte(randstr.Hex(10)))
 	ms := services.NewMessageService(repositories.NewMessageRepoSQLX(db.ConnectSQLXTest()))
 	us := services.NewUserService(repositories.NewUserRepoSQLX(db.ConnectSQLXTest()))
+	socketService := services.NewSocketService()
 	dataController := NewDataController(ms, us)
-	talkmeController := NewTalkmeController(db.GoDotEnvVariable("XToken"), dataController)
-	registry.ChatController = NewChatController(tokenBytes, dataController, talkmeController)
-	registry.AuthController = NewAuthController(tokenBytes)
-	talkmeController.Update(time.Second*10, false)
+	talkmeController := NewTalkMeController(db.GoDotEnvVariable("XToken"), dataController, socketService)
+	registry.ChatController = NewChatController(tokenizer, dataController, talkmeController)
+	registry.AuthController = NewAuthController(tokenizer)
+	registry.SocketController = NewSocketController(tokenizer, socketService, dataController)
+	talkmeController.Update(time.Second*5, true)
 	return registry
 }
