@@ -7,9 +7,11 @@ class MySocket {
     }
     showMessage(text){
         const jtext = JSON.parse(text)
-        jtext.forEach((element) => {
-            this.addMessage(element['MessageText'],element['SenderId'])
-        })
+        if (jtext != null){
+            jtext.forEach((element) => {
+                this.addMessage(element['MessageText'],element['SenderId'])
+            })
+        }
     }
     send(){
         this.mysocket.send(inputField.value)

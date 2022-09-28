@@ -1,14 +1,25 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/xegcrbq/P2PChat/internal/models"
+	"github.com/xegcrbq/P2PChat/internal/models/commands"
 	"github.com/xegcrbq/P2PChat/internal/utils"
 	"net/http"
 	"time"
 )
 
 type AuthController struct {
-	tknz *utils.Tokenizer
+	tknz           *utils.Tokenizer
+	dataController *DataController
+}
+
+func NewAuthController(tknz *utils.Tokenizer, dataController *DataController) *AuthController {
+	return &AuthController{
+		tknz:           tknz,
+		dataController: dataController,
+	}
 }
 
 func (cC *AuthController) newSession(username string) *fiber.Cookie {
@@ -37,14 +48,19 @@ func (cC *AuthController) UserChat(c *fiber.Ctx) error {
 }
 
 func (cC *AuthController) UsernameEntered(c *fiber.Ctx) error {
+
 	username := c.Params("username")
-	unCookie := cC.newSession(username)
+	fmt.Println(username)
+	answ := cC.dataController.Execute(commands.CreateUserByUser{User: &models.User{
+		UserName: username,
+		Password: username,
+	}})
+	fmt.Println(answ.Err)
+	if answ.Err != nil {
+		c.SendStatus(fiber.StatusInternalServerError)
+		return nil
+	}
+	unCookie := cC.newSession(answ.UserName)
 	c.Cookie(unCookie)
 	return nil
-}
-
-func NewAuthController(tknz *utils.Tokenizer) *AuthController {
-	return &AuthController{
-		tknz: tknz,
-	}
 }

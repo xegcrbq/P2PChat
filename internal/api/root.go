@@ -47,7 +47,7 @@ func NewAPIService(log *logrus.Entry, dbConn *pgxpool.Pool) (*APIService, error)
 	//talkMe
 	api.Post("send/", controllersRegistry.ChatController.SendMessageToTalkMe)
 	api.Post("update/v2/", controllersRegistry.ChatController.UpdateV2)
-	api.Post("webhook/", controllersRegistry.ChatController.WH)
+	//api.Post("webhook/", controllersRegistry.ChatController.WH)
 	//socket
 	api.Get("socket/:session_id", ikisocket.New(controllersRegistry.SocketController.SocketReaderCreate))
 	return svc, nil

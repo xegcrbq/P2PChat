@@ -1,6 +1,6 @@
 CREATE TABLE Users(
     UserId SERIAL PRIMARY KEY,
-    UserName varchar(50) NOT NULL,
+    UserName varchar(50) NOT NULL unique CHECK (length(UserName) >= 1),
     Password varchar(50) NOT NULL,
     IsTrader bit DEFAULT 0::bit
 );
@@ -39,9 +39,9 @@ create table Messages(
 INSERT INTO
     users (UserId, UserName, Password, IsTrader)
 VALUES
-    (1,'admin', 'admin', 1::bit),
-    (2,'user', 'password', 0::bit),
-    (3,'login', 'password', 0::bit);
+    (0,'admin', 'admin', 1::bit),
+    (1,'user', 'password', 0::bit),
+    (2,'login', 'password', 0::bit);
 
 insert into
     orders(OrderId, SellerId, SellerTicker, SellerAmount, BuyerId, BuyerTicker, BuyerAmount)
@@ -53,4 +53,3 @@ insert into
 values
     (1, './test.http');
 
-select * from messages where SenderId=1 ORDER BY SendTime desc LIMIT 1;

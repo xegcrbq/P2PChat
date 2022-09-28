@@ -38,7 +38,6 @@ func ConnectRedis() *redis.Client {
 func ConnectSQLXTest() *sqlx.DB {
 	q := url.Values{}
 	q.Set("sslmode", "disable")
-
 	u := url.URL{
 		Scheme:   "postgres",
 		User:     url.UserPassword("postgres", "1"),
@@ -46,6 +45,16 @@ func ConnectSQLXTest() *sqlx.DB {
 		Path:     "postgres",
 		RawQuery: q.Encode(),
 	}
+	if os.Getenv("Docker") != "" {
+		u = url.URL{
+			Scheme:   "postgres",
+			User:     url.UserPassword("root", "password"),
+			Host:     "db:5432", // change here
+			Path:     "postgres",
+			RawQuery: q.Encode(),
+		}
+	}
+
 	dbDriver := "postgres"
 	db, err := sqlx.Open(dbDriver, u.String())
 	if err != nil {

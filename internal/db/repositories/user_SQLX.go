@@ -27,3 +27,13 @@ func (r *UserRepoSQLX) ReadUserByUserId(command *commands.ReadUserByUserId) (*mo
 		`select * from users where userid=$1;`, command.UserId)
 	return &user, err
 }
+func (r *UserRepoSQLX) CreateUserByUser(command *commands.CreateUserByUser) error {
+	user := command.User
+	_, err := r.db.Exec(`
+	insert into 
+	    users(userid, username, password) 
+	VALUES
+		(((SELECT MAX(userid) FROM users)+1), $1, $2);`,
+		user.UserName, user.Password)
+	return err
+}

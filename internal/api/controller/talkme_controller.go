@@ -32,7 +32,11 @@ func NewTalkMeController(xToken string, controller *DataController, socketServic
 
 // AutoUpdate в начале обновляет бд до новейшего состояния, затем каждые duration отправляет на talkme запрос на получение последних сообщений и вносит их в бд
 func (c *TalkMeController) Update(duration time.Duration, endlessly bool) {
+	fmt.Println("UpdateStarted")
 	answA := c.dataController.Execute(commands.ReadUserByUserName{UserName: "admin"})
+	fmt.Println("AdminReaded")
+	fmt.Println(answA.Err)
+	fmt.Println(answA.User)
 	if answA.Err != nil || answA.User == nil {
 		return
 	}
@@ -91,6 +95,9 @@ func (c *TalkMeController) readMessagesForPeriod(start, end time.Time) (*models.
 	}
 	talkMeAnswer := models.TalkMeMessageGetListAnswer{}
 	err = json.Unmarshal(bodyBytes, &talkMeAnswer)
+	if len(talkMeAnswer.Result) != 0 {
+		fmt.Println(talkMeAnswer.Result)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +110,10 @@ func (c *TalkMeController) messagesFromOperator(messageList *models.TalkMeMessag
 	for _, inputResult := range messageList.Result {
 		answ := c.dataController.Execute(commands.ReadUserByUserName{UserName: inputResult.ClientId})
 		if answ.Err != nil || answ.User == nil {
-			continue
+			c.dataController.Execute(commands.CreateUserByUser{User: &models.User{
+				UserName: inputResult.ClientId,
+				Password: inputResult.ClientId,
+			}})
 		}
 		var messages []models.TalkMeMessage
 		for _, message := range inputResult.Messages {
@@ -122,7 +132,7 @@ func (c *TalkMeController) messagesFromOperator(messageList *models.TalkMeMessag
 
 // readAndUpdateDB запрос на talkme + внесение в бд
 func (c *TalkMeController) readAndUpdateDB(dateEnd time.Time, adminId int32) {
-	answ, err := c.readMessagesForPeriod(c.dateStart, dateEnd)
+	answ, err := c.readMessagesForPeriod(c.dateStart.Add(time.Hour*3).UTC(), dateEnd.Add(time.Hour*3).UTC())
 	if err != nil {
 		log.Fatal(err)
 		return

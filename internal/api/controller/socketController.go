@@ -31,8 +31,11 @@ func NewSocketController(tknz *utils.Tokenizer, socketService *services.SocketSe
 func (c *SocketController) Init() {
 	// Multiple event handling supported
 	ikisocket.On(ikisocket.EventConnect, func(ep *ikisocket.EventPayload) {
-		c.socketService.AddSocket(ep.SocketAttributes["username"].(string), ep.SocketUUID, ep.Kws)
-		ep.Kws.Emit(c.loadPreviousMessages(ep.SocketAttributes["username"].(string)))
+		if ep.SocketAttributes["username"] != nil {
+			c.socketService.AddSocket(ep.SocketAttributes["username"].(string), ep.SocketUUID, ep.Kws)
+			ep.Kws.Emit(c.loadPreviousMessages(ep.SocketAttributes["username"].(string)))
+			fmt.Println("Connected: ", ep.SocketAttributes["username"].(string))
+		}
 	})
 	//old
 	//ikisocket.On(ikisocket.EventMessage, func(ep *ikisocket.EventPayload) {
@@ -47,18 +50,24 @@ func (c *SocketController) Init() {
 	ikisocket.On(ikisocket.EventMessage, c.sendMessageToTalkMe)
 
 	ikisocket.On(ikisocket.EventDisconnect, func(ep *ikisocket.EventPayload) {
-		c.socketService.DeleteSocket(ep.SocketAttributes["username"].(string), ep.SocketUUID)
+		if ep.SocketAttributes["username"] != nil {
+			c.socketService.DeleteSocket(ep.SocketAttributes["username"].(string), ep.SocketUUID)
+		}
 	})
 }
 func (c *SocketController) SocketReaderCreate(kws *ikisocket.Websocket) {
 	data, tkn, _ := c.tknz.ParseDataClaims(kws.Params("session_id"))
 	if !tkn.Valid {
+		kws.Close()
 		return
 	}
 	kws.SetAttribute("username", data.Data)
 	return
 }
 func (c *SocketController) sendMessageToTalkMe(ep *ikisocket.EventPayload) {
+	if ep.SocketAttributes["username"] == nil {
+		return
+	}
 	URL := "https://lcab.talk-me.ru/json/v1.0/chat/message/sendToOperator"
 	json := strings.NewReader(fmt.Sprintf(`
 	{

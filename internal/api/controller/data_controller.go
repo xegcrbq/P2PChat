@@ -44,6 +44,12 @@ func (c *DataController) Execute(command interface{}) *models.Answer {
 			Err:      err,
 		}
 	//users
+	case commands.CreateUserByUser:
+		username, err := c.usersService.CreateUserByUser(command.(commands.CreateUserByUser))
+		return &models.Answer{
+			UserName: username,
+			Err:      err,
+		}
 	case commands.ReadUserByUserName:
 		user, err := c.usersService.ReadUserByUserName(command.(commands.ReadUserByUserName))
 		return &models.Answer{
